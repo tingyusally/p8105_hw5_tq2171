@@ -1,0 +1,12 @@
+---
+title: "p8105_hw5_tq2171"
+author: "Tingyu Qian"
+date: "2024-11-13"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
