@@ -5,8 +5,109 @@ date: "2024-11-13"
 output: github_document
 ---
 
+## Problem 2
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+```{r}
+# load labraries and set seeds
+library(tidyverse)
+set.seed(1)
+library(broom)
+library(ggplot2)
+```
+
+```{r}
+# Set parameters
+n <- 30     # sample size
+sigma <- 5  # standard deviation
+mu_values <- 0:6  # values of mu to test
+alpha <- 0.05     # significance level
+num_simulations <- 5000  # number of simulations per mu
+```
+
+```{r}
+# Initialize storage for results
+results <- data.frame(mu = numeric(), estimate = numeric(), p_value = numeric(), reject_null = logical())
+```
+
+```{r}
+# Function to simulate data, perform t-test, and store results
+run_simulation <- function(mu) {
+  estimates <- numeric(num_simulations)
+  p_values <- numeric(num_simulations)
+  reject_null <- logical(num_simulations)
+  
+  for (i in 1:num_simulations) {
+    # Generate sample data
+    data <- rnorm(n, mean = mu, sd = sigma)
+    
+    # Perform t-test
+    test <- t.test(data, mu = 0)
+    tidy_test <- tidy(test)
+    
+    # Store results
+    estimates[i] <- tidy_test$estimate
+    p_values[i] <- tidy_test$p.value
+    reject_null[i] <- tidy_test$p.value < alpha
+  }
+  
+  data.frame(mu = mu, estimate = estimates, p_value = p_values, reject_null = reject_null)
+}
+
+```
+
+```{r}
+# Run simulations for each value of mu
+for (mu in mu_values) {
+  results <- rbind(results, run_simulation(mu))
+}
+
+# Calculate power and average estimate for each mu
+power_analysis <- results %>%
+  group_by(mu) %>%
+  summarise(
+    power = mean(reject_null),
+    avg_estimate_all = mean(estimate),
+    avg_estimate_rejected = mean(estimate[reject_null])
+  )
+
+```
+
+```{r}
+# Plot 1: Power vs. Effect Size (mu)
+ggplot(power_analysis, aes(x = mu, y = power)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Power vs Effect Size", x = "True Value of Mu", y = "Power (Proportion of Null Rejected)")
+```
+The plot shows a clear positive association between effect size (μ) and the power of the test (the probability of rejecting the null hypothesis when it is false). As the true value of μ increases, the power also increases, reaching nearly 100% when μ is around 4 or higher.
+
+This trend indicates that larger effect sizes make it easier for the test to detect a difference from the null hypothesis (μ=0), thus increasing the likelihood of rejecting the null hypothesis correctly. When the effect size is small (close to 0), the power is low, meaning there is a higher chance of failing to detect the true effect. As the effect size grows, the test becomes more sensitive, and the power approaches 1.
+
+```{r}
+# Plot 2 average estimate of mu across all samples and only those where the null was rejected
+ggplot(power_analysis, aes(x = mu)) +
+  geom_line(aes(y = avg_estimate_all, color = "All Samples")) +
+  geom_point(aes(y = avg_estimate_all, color = "All Samples")) +
+  geom_line(aes(y = avg_estimate_rejected, color = "Null Rejected Only")) +
+  geom_point(aes(y = avg_estimate_rejected, color = "Null Rejected Only")) +
+  labs(
+    title = "Average Estimate of Mu vs True Value of Mu",
+    x = "True Value of Mu",
+    y = "Average Estimate of Mu"
+  ) +
+  scale_color_manual(name = "Samples", values = c("All Samples" = "blue", "Null Rejected Only" = "red")) +
+  theme_minimal()
+```
+
+In the plot, the sample average of \(\hat{\mu}\) across tests for which the null hypothesis was rejected (shown in red) tends to be higher than the true value of \(\mu\), especially at lower values of \(\mu\). This discrepancy occurs due to selection bias: by only considering samples where the null hypothesis was rejected, we are effectively selecting cases with larger deviations from the null. 
+
+When \(\mu\) is small (close to zero), the test requires larger sample means to reject the null hypothesis, leading to an overestimation of \(\mu\) in those cases. As \(\mu\) increases, the bias decreases because the true effect size is large enough that the sample mean is more likely to reflect the true \(\mu\), even without selection bias. Therefore, the average estimate across tests where the null is rejected is not consistently equal to the true \(\mu\) due to this selection effect, particularly for smaller values of \(\mu\).
+
+
+
 
 
