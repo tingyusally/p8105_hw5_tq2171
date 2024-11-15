@@ -146,7 +146,7 @@ ggplot(power_analysis, aes(x = mu)) +
 
 In the plot, the sample average of \(\hat{\mu}\) across tests for which the null hypothesis was rejected (shown in red) tends to be higher than the true value of \(\mu\), especially at lower values of \(\mu\). This discrepancy occurs due to selection bias: by only considering samples where the null hypothesis was rejected, we are effectively selecting cases with larger deviations from the null. 
 
-When \(\mu\) is small (close to zero), the test requires larger sample means to reject the null hypothesis, leading to an overestimation of \(\mu\) in those cases. As \(\mu\) increases, the bias decreases because the true effect size is large enough that the sample mean is more likely to reflect the true \(\mu\), even without selection bias. Therefore, the average estimate across tests where the null is rejected is not consistently equal to the true \(\mu\) due to this selection effect, particularly for smaller values of \(\mu\).
+When \(\mu\) is small (close to zero), the test requires larger sample means to reject the null hypothesis, leading to an overestimation of \(\mu\) in those cases. As \(\mu\) increases, the bias decreases because the true effect size is large enough that the sample mean is more likely to reflect the true \(\mu\). Therefore, the average estimate across tests where the null is rejected is not consistently equal to the true \(\mu\) due to this selection effect, particularly for smaller values of \(\mu\).
 
 ## Problem 3
 ```{r}
