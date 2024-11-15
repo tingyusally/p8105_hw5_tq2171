@@ -52,7 +52,7 @@ Initially, the probability is very low for small group sizes, as expected, since
 
 ## Problem 2
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 # load labraries and set seeds
 library(tidyverse)
 set.seed(1)
@@ -204,7 +204,7 @@ baltimore_estimate <- baltimore_results %>%
 kable(baltimore_estimate)
 ```
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 # Function to perform prop.test and return a tidy dataframe
 run_prop_test <- function(total, unsolved) {
   test_result <- prop.test(unsolved, total)
