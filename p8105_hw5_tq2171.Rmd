@@ -58,6 +58,7 @@ library(tidyverse)
 set.seed(1)
 library(broom)
 library(ggplot2)
+library(knitr)
 ```
 
 ```{r}
@@ -170,7 +171,8 @@ city_summary <- data %>%
     total_homicides = n(),
     unsolved_homicides = sum(disposition %in% c("Closed without arrest", "Open/No arrest"))
   )
-city_summary
+
+kable(city_summary)
 ```
 
 ```{r}
@@ -199,7 +201,7 @@ baltimore_estimate <- baltimore_results %>%
   select(estimate, conf.low, conf.high)
 
 # Display the results
-baltimore_estimate
+kable(baltimore_estimate)
 ```
 
 ```{r}
@@ -218,7 +220,7 @@ results <- city_summary %>%
   select(city_state, estimate, conf.low, conf.high)
 
 # Display the final tidy dataframe with estimates and confidence intervals
-results
+kable(results)
 ```
 
 ```{r}
