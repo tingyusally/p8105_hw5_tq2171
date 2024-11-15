@@ -5,6 +5,10 @@ date: "2024-11-13"
 output: github_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ## Problem 1
 ```{r}
 # Load necessary libraries
@@ -47,10 +51,6 @@ ggplot(results, aes(x = group_size, y = probability)) +
 Initially, the probability is very low for small group sizes, as expected, since fewer people mean fewer chances for overlap in birthdays. However, the probability grows rapidly as the group size increases. By the time the group reaches about 23 people, the probability surpasses 50%, meaning there’s a greater than even chance that at least two people share a birthday. This counterintuitive result demonstrates the birthday paradox: even in relatively small groups, the probability of shared birthdays is surprisingly high. By a group size of 50, the probability is nearly 1, indicating an almost certain chance of a shared birthday.
 
 ## Problem 2
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ```{r}
 # load labraries and set seeds
