@@ -107,6 +107,94 @@ In the plot, the sample average of \(\hat{\mu}\) across tests for which the null
 
 When \(\mu\) is small (close to zero), the test requires larger sample means to reject the null hypothesis, leading to an overestimation of \(\mu\) in those cases. As \(\mu\) increases, the bias decreases because the true effect size is large enough that the sample mean is more likely to reflect the true \(\mu\), even without selection bias. Therefore, the average estimate across tests where the null is rejected is not consistently equal to the true \(\mu\) due to this selection effect, particularly for smaller values of \(\mu\).
 
+## Problem 3
+```{r}
+# Load the data
+data <- read.csv("./data/homicide-data.csv")
+```
+
+There are `r nrow(data)` observations in the dataset 'homicide', which means there are `r nrow(data)` rows and `r ncol(data)` variables in the dataset. These 12 variables are `r names(data)`. The Washington Post collected data on more than 52,000 criminal homicides over the past decade in 50 of the largest American cities. The uid variable is a unique identifier assigned to each case. Reported_date records the date the homicide was reported, formatted as YYYYMMDD. The victim_last and victim_first variables capture the victim’s last and first names, respectively, providing basic identifying information. The victim_race variable indicates the race of the victim, which could be used to explore demographic patterns in homicide cases. Similarly, victim_age records the age of the victim, and victim_sex indicates the victim’s gender, allowing for demographic analysis by age and sex. The city and state variables identify the location of each homicide by specifying the city and state where it occurred, while lat (latitude) and lon (longitude) provide more precise geographical coordinates. Finally, the disposition variable indicates the outcome of each case, specifying whether it was "Closed without arrest," "Open/No arrest," or "Closed by arrest."
+
+```{r}
+# Create city_state variable
+data <- data %>%
+  mutate(city_state = paste(city, state, sep = ", "))
+```
+
+```{r}
+# Summarize total homicides and unsolved homicides (assume disposition column indicates solved/unsolved)
+city_summary <- data %>%
+  group_by(city_state) %>%
+  summarise(
+    total_homicides = n(),
+    unsolved_homicides = sum(disposition %in% c("Closed without arrest", "Open/No arrest"))
+  )
+city_summary
+```
+
+```{r}
+# Filter data for Baltimore, MD
+baltimore_data <- data %>%
+  filter(city == "Baltimore" & state == "MD")
+
+# Summarize total and unsolved homicides in Baltimore
+baltimore_summary <- baltimore_data %>%
+  summarise(
+    total_homicides = n(),
+    unsolved_homicides = sum(disposition %in% c("Closed without arrest", "Open/No arrest"))
+  )
+
+# Perform proportion test
+baltimore_prop_test <- prop.test(
+  baltimore_summary$unsolved_homicides,
+  baltimore_summary$total_homicides
+)
+
+# Use broom::tidy to convert the test output to a tidy dataframe
+baltimore_results <- tidy(baltimore_prop_test)
+
+# Extract the estimated proportion and confidence intervals
+baltimore_estimate <- baltimore_results %>%
+  select(estimate, conf.low, conf.high)
+
+# Display the results
+baltimore_estimate
+```
+
+```{r}
+# Function to perform prop.test and return a tidy dataframe
+run_prop_test <- function(total, unsolved) {
+  test_result <- prop.test(unsolved, total)
+  tidy(test_result)
+}
+
+# Apply prop.test to each city and extract estimates and confidence intervals
+results <- city_summary %>%
+  mutate(
+    test_result = map2(total_homicides, unsolved_homicides, run_prop_test)
+  ) %>%
+  unnest(test_result) %>%
+  select(city_state, estimate, conf.low, conf.high)
+
+# Display the final tidy dataframe with estimates and confidence intervals
+results
+```
+
+```{r}
+# Plotting the estimates and confidence intervals for each city
+ggplot(results, aes(x = reorder(city_state, estimate), y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  labs(
+    title = "Proportion of Unsolved Homicides by City",
+    x = "City",
+    y = "Estimated Proportion of Unsolved Homicides"
+  ) +
+  coord_flip() +
+  theme_minimal()
+```
+
+
 
 
 
