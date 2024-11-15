@@ -5,6 +5,47 @@ date: "2024-11-13"
 output: github_document
 ---
 
+## Problem 1
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Function to check if there are duplicate birthdays in a group
+has_duplicate_birthday <- function(group_size) {
+  birthdays <- sample(1:365, group_size, replace = TRUE)  # Random birthdays
+  return(any(duplicated(birthdays)))                      # Check for duplicates
+}
+
+# Simulation for each group size from 2 to 50
+set.seed(123)  # For reproducibility
+group_sizes <- 2:50
+num_simulations <- 10000
+results <- data.frame(group_size = integer(), probability = numeric())
+
+for (n in group_sizes) {
+  # Run the function 10,000 times and calculate the probability of a duplicate
+  shared_birthday_count <- sum(replicate(num_simulations, has_duplicate_birthday(n)))
+  probability <- shared_birthday_count / num_simulations
+  
+  # Store results
+  results <- rbind(results, data.frame(group_size = n, probability = probability))
+}
+
+# Plotting the results
+ggplot(results, aes(x = group_size, y = probability)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Probability of at Least Two People Sharing a Birthday",
+    x = "Group Size",
+    y = "Probability"
+  ) +
+  theme_minimal()
+
+```
+
+Initially, the probability is very low for small group sizes, as expected, since fewer people mean fewer chances for overlap in birthdays. However, the probability grows rapidly as the group size increases. By the time the group reaches about 23 people, the probability surpasses 50%, meaning there’s a greater than even chance that at least two people share a birthday. This counterintuitive result demonstrates the birthday paradox: even in relatively small groups, the probability of shared birthdays is surprisingly high. By a group size of 50, the probability is nearly 1, indicating an almost certain chance of a shared birthday.
+
 ## Problem 2
 
 ```{r setup, include=FALSE}
